@@ -9,7 +9,7 @@ function App() {
   
   useEffect(() => {
     // Test the backend connection
-    fetch('http://localhost:5000/api/test')
+    fetch('http://localhost:5001/api/test')
       .then(response => response.json())
       .then(data => setMessage(data.message))
       .catch(error => console.error('Error connecting to backend:', error));

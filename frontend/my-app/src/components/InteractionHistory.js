@@ -9,7 +9,7 @@ const InteractionHistory = () => {
   useEffect(() => {
     const fetchHistory = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/ai/history');
+        const response = await axios.get('http://localhost:5001/api/ai/history');
         setHistory(response.data);
         setLoading(false);
       } catch (err) {

@@ -1,12 +1,12 @@
 # AI Web Development Project
 
-A full-stack web application that integrates OpenAI's GPT-3.5-turbo model for text generation with a modern React frontend and Node.js/Express backend. The application allows users to generate AI-powered text responses and maintains a history of all interactions in a MongoDB database.
+A full-stack web application that integrates Anthropic Claude (e.g., claude-3-haiku-20240307) for text generation with a modern React frontend and Node.js/Express backend. The application allows users to generate AI-powered text responses and maintains a history of all interactions in a MongoDB database.
 
 ## 🚀 Features
 
-- **AI Text Generation**: Generate text responses using OpenAI's GPT-3.5-turbo model
+- **AI Text Generation**: Generate text responses using Anthropic Claude models
 - **Interactive History**: View and manage all previous AI interactions
-- **Real-time API Integration**: Seamless communication with OpenAI API
+- **Real-time API Integration**: Seamless communication with Anthropic API
 - **MongoDB Storage**: Persistent storage of all interactions with metadata
 - **Modern UI**: Clean and responsive React-based user interface
 - **CORS Enabled**: Cross-origin resource sharing for frontend-backend communication
@@ -22,7 +22,7 @@ A full-stack web application that integrates OpenAI's GPT-3.5-turbo model for te
 - **Node.js** - JavaScript runtime environment
 - **Express.js** - Web application framework
 - **MongoDB** - NoSQL database with Mongoose ODM
-- **OpenAI API** - AI text generation service
+- **Anthropic Claude API** - AI text generation service
 
 ### Development Tools
 - **Nodemon** - Auto-restart server during development
@@ -34,8 +34,8 @@ Before running this project, make sure you have the following installed:
 
 - **Node.js** (version 14.0 or higher)
 - **npm** or **yarn** package manager
-- **MongoDB Atlas** account (for database)
-- **OpenAI API Key** (for AI text generation)
+- **MongoDB** (local or Atlas)
+- **Anthropic API Key** (for AI text generation)
 
 ## 🚀 Installation
 
@@ -62,8 +62,8 @@ This command will install dependencies for:
 Create a `.env` file in the `backend` directory with the following variables:
 
 ```bash
-# OpenAI API Configuration
-OPENAI_API_KEY=your_openai_api_key_here
+# Anthropic API Configuration
+ANTHROPIC_API_KEY=your_anthropic_api_key_here
 
 # MongoDB Configuration (optional - currently hardcoded in config/db.js)
 MONGODB_URI=your_mongodb_connection_string
@@ -72,6 +72,16 @@ MONGODB_URI=your_mongodb_connection_string
 ### Database Configuration
 
 The MongoDB connection is currently configured in `backend/config/db.js`. For production, consider moving the connection string to environment variables.
+
+### Accessing Your Local MongoDB
+
+To connect to your local MongoDB instance and inspect your data, use:
+
+```bash
+mongosh "mongodb://localhost:27017"
+```
+
+This will open the MongoDB shell connected to your local database.
 
 ## 🏃‍♂️ Running the Application
 
@@ -138,7 +148,7 @@ JS_Project/
 | `GET` | `/` | Welcome message |
 | `GET` | `/api/test` | Backend health check |
 | `POST` | `/api/ai/generate` | Generate AI text response |
-| `GET` | `/api/ai/history/:id` | Get specific interaction by ID |
+| `GET` | `/api/ai/history` | Get all interaction history |
 
 ### AI Generation Endpoint
 
@@ -157,8 +167,8 @@ JS_Project/
 {
   "result": "AI generated response",
   "usage": {
-    "prompt_tokens": 10,
-    "completion_tokens": 50,
+    "input_tokens": 10,
+    "output_tokens": 50,
     "total_tokens": 60
   }
 }
@@ -168,13 +178,25 @@ JS_Project/
 
 1. **Start the application** using `npm run startApp`
 2. **Open your browser** and navigate to `http://localhost:3000`
+
+![AI Text Generator Interface](./images/Screenshot%202025-07-29%20at%208.33.35%20AM.png)
+
 3. **Switch between tabs**:
    - **Generate Text**: Create new AI-powered text responses
    - **View History**: Browse all previous interactions
+
+![Interaction History View](./images/Screenshot%202025-07-29%20at%208.33.58%20AM.png)
+
 4. **Enter your prompt** and click "Generate" to get AI responses
 5. **View interaction history** including tokens used and timestamps
 
-## 🔧 Available Scripts
+## 📊 Database View
+
+Your interactions are stored in MongoDB and can be viewed using MongoDB Compass:
+
+![MongoDB Compass - Interactions Collection](./images/Screenshot%202025-07-29%20at%208.34.01%20AM.png)
+
+## �� Available Scripts
 
 ### Root Level
 - `npm run startApp` - Start both frontend and backend concurrently
@@ -204,13 +226,12 @@ lsof -ti:3000 | xargs kill -9
 ```
 
 **Issue:** MongoDB connection failed
-- Check your internet connection
-- Verify MongoDB Atlas cluster is running
-- Ensure connection string is correct in `backend/config/db.js`
+- Check your MongoDB service is running
+- Verify MongoDB connection string is correct in `backend/config/db.js`
 
-**Issue:** OpenAI API errors
-- Verify your OpenAI API key is valid
-- Check your OpenAI account has sufficient credits
+**Issue:** Anthropic API errors
+- Verify your Anthropic API key is valid
+- Check your Anthropic account has sufficient credits
 - Ensure the API key is set in your `.env` file
 
 **Issue:** Module not found errors
@@ -224,7 +245,7 @@ cd ../frontend/my-app && rm -rf node_modules package-lock.json && npm install
 
 ## 🔒 Security Notes
 
-- **API Keys**: Never commit your OpenAI API key to version control
+- **API Keys**: Never commit your Anthropic API key to version control
 - **Database**: Consider using environment variables for database connection strings
 - **CORS**: Currently configured to allow all origins (`*`) - restrict for production
 
@@ -233,7 +254,7 @@ cd ../frontend/my-app && rm -rf node_modules package-lock.json && npm install
 ### Backend Deployment (Heroku/Vercel/Railway)
 
 1. Set environment variables:
-   - `OPENAI_API_KEY`
+   - `ANTHROPIC_API_KEY`
    - `MONGODB_URI`
 
 2. Update CORS settings for your production domain
@@ -272,7 +293,7 @@ This project is licensed under the ISC License.
 
 ## 🙏 Acknowledgments
 
-- [OpenAI](https://openai.com/) for providing the GPT API
+- [Anthropic](https://www.anthropic.com/) for providing the Claude API
 - [React](https://reactjs.org/) team for the amazing frontend library
 - [Express.js](https://expressjs.com/) for the robust backend framework
 - [MongoDB](https://www.mongodb.com/) for the flexible database solution

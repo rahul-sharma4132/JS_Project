@@ -1,72 +1,64 @@
 const express = require('express');
 const router = express.Router();
-const OpenAI = require('openai');
+const Anthropic = require('@anthropic-ai/sdk');
 const Interaction = require('../models/Interaction');
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY
 });
 
 // Text generation endpoint
 router.post('/generate', async (req, res) => {
-  // Add CORS headers
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-
   try {
-    const { prompt, maxTokens = 100 } = req.body;
+    const { prompt, maxTokens = 1000 } = req.body;
     
     if (!prompt) {
       return res.status(400).json({ error: 'Prompt is required' });
     }
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
-      messages: [{ role: "user", content: prompt }],
-      max_tokens: maxTokens
+    const completion = await anthropic.messages.create({
+      model: "claude-3-haiku-20240307",
+      max_tokens: maxTokens,
+      messages: [
+        { role: "user", content: prompt }
+      ]
     });
 
     // Save the interaction to MongoDB
     const interaction = new Interaction({
       prompt: prompt,
-      response: responseText,
-      model: "gpt-3.5-turbo",
+      response: completion.content[0].text,
+      model: "claude-3-sonnet-20240229",
       tokens: {
-        prompt: completion.usage.prompt_tokens,
-        completion: completion.usage.completion_tokens,
-        total: completion.usage.total_tokens
+        prompt: completion.usage.input_tokens,
+        completion: completion.usage.output_tokens,
+        total: completion.usage.input_tokens + completion.usage.output_tokens
       }
     });
     
     await interaction.save();
 
-    res.json({ 
-      result: completion.choices[0].message.content,
+    res.json({
+      result: completion.content[0].text,
       usage: completion.usage
     });
-
-    router.get('/history/:id', async (req, res) => {
-      try {
-        const interaction = await Interaction.findById(req.params.id);
-        
-        if (!interaction) {
-          return res.status(404).json({ error: 'Interaction not found' });
-        }
-        
-        res.json(interaction);
-      } catch (error) {
-        console.error('Error fetching interaction:', error);
-        res.status(500).json({ error: 'Error fetching interaction' });
-      }
-    });
-
   } catch (error) {
-    console.error('OpenAI API error:', error);
+    console.error('Anthropic API error:', error);
     res.status(500).json({ 
       error: 'Error generating content',
       details: error.message 
     });
+  }
+});
+
+// Get all interaction history
+router.get('/history', async (req, res) => {
+  try {
+    const history = await Interaction.find().sort({ createdAt: -1 });
+    res.json(history);
+  } catch (error) {
+    console.error('Error fetching interaction history:', error);
+    res.status(500).json({ error: 'Error fetching interaction history' });
   }
 });
 
