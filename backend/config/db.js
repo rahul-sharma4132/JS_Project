@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 // const uri = "mongodb+srv://js_user_01:OPTUZxDX3OpJpTBp@cluster23623.ai2tkuc.mongodb.net/?retryWrites=true&w=majority&appName=Cluster23623";
 // const uri = "mongodb+srv://js_user_01:OPTsdfsdfZxDX3OpJpTBp@cluster23623.ai2tkuc.mongodb.net"
 // const uri = "mongodb+srv://js_user_01:Mbszfb6ngknVdcxV@cluster23623.ai2tkuc.mongodb.net/?retryWrites=true&w=majority&appName=Cluster23623";
-const uri = "mongodb://localhost:27017/ai_web_dev_db";
+const uri = process.env.MONGODB_URI || "mongodb://localhost:27017/ai_web_dev_db";
 
 const connectDB = async () => {
   try {

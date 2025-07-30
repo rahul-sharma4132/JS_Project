@@ -85,7 +85,31 @@ This will open the MongoDB shell connected to your local database.
 
 ## 🏃‍♂️ Running the Application
 
-### Development Mode (Recommended)
+### Using Docker (Recommended)
+
+The easiest way to run the entire application is using Docker Compose:
+
+1. **Create a `.env` file** in the project root with your Anthropic API key:
+   ```bash
+   ANTHROPIC_API_KEY=your_anthropic_api_key_here
+   ```
+
+2. **Build and start all services:**
+   ```bash
+   docker-compose up --build
+   ```
+
+3. **Access the application:**
+   - Frontend: http://localhost:3000
+   - Backend API: http://localhost:5001
+   - MongoDB: localhost:27017
+
+4. **Stop the services:**
+   ```bash
+   docker-compose down
+   ```
+
+### Development Mode (Without Docker)
 
 Run both frontend and backend concurrently:
 ```bash
@@ -196,13 +220,20 @@ Your interactions are stored in MongoDB and can be viewed using MongoDB Compass:
 
 ![MongoDB Compass - Interactions Collection](./images/Screenshot%202025-07-29%20at%208.34.01%20AM.png)
 
-## �� Available Scripts
+## 🔧 Available Scripts
 
 ### Root Level
 - `npm run startApp` - Start both frontend and backend concurrently
 - `npm run start:backend` - Start backend server only
 - `npm run start:frontend` - Start frontend React app only
 - `npm run install:all` - Install all dependencies for all services
+
+### Docker Commands
+- `docker-compose up --build` - Build and start all services
+- `docker-compose up` - Start all services (if already built)
+- `docker-compose down` - Stop all services
+- `docker-compose logs` - View logs from all services
+- `docker-compose logs [service-name]` - View logs from specific service
 
 ### Backend (`cd backend`)
 - `npm run dev` - Start development server with nodemon
