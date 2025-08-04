@@ -10,11 +10,13 @@ A full-stack web application that integrates Anthropic Claude (e.g., claude-3-ha
 - **MongoDB Storage**: Persistent storage of all interactions with metadata
 - **Modern UI**: Clean and responsive React-based user interface
 - **CORS Enabled**: Cross-origin resource sharing for frontend-backend communication
+- **Production Ready**: Optimized build process with React Scripts 5.0.1
 
 ## 🛠️ Tech Stack
 
 ### Frontend
 - **React 19.1.0** - Modern JavaScript library for building user interfaces
+- **React Scripts 5.0.1** - Build tools and development server
 - **CSS3** - Styling and responsive design
 - **JavaScript (ES6+)** - Modern JavaScript features
 
@@ -23,6 +25,7 @@ A full-stack web application that integrates Anthropic Claude (e.g., claude-3-ha
 - **Express.js** - Web application framework
 - **MongoDB** - NoSQL database with Mongoose ODM
 - **Anthropic Claude API** - AI text generation service
+- **@anthropic-ai/sdk** - Official Anthropic SDK for Node.js
 
 ### Development Tools
 - **Nodemon** - Auto-restart server during development
@@ -54,6 +57,8 @@ This command will install dependencies for:
 - Root project
 - Backend server
 - Frontend React app
+
+**Note:** The frontend now uses React Scripts 5.0.1 for proper build functionality.
 
 ## ⚙️ Configuration
 
@@ -241,7 +246,7 @@ Your interactions are stored in MongoDB and can be viewed using MongoDB Compass:
 
 ### Frontend (`cd frontend/my-app`)
 - `npm start` - Start React development server
-- `npm run build` - Build for production
+- `npm run build` - Build for production (requires react-scripts 5.0.1+)
 - `npm test` - Run tests
 
 ## 🐛 Troubleshooting
@@ -274,6 +279,14 @@ cd backend && rm -rf node_modules package-lock.json && npm install
 cd ../frontend/my-app && rm -rf node_modules package-lock.json && npm install
 ```
 
+**Issue:** React Scripts build errors
+```bash
+# If you encounter build errors, ensure react-scripts is properly installed
+cd frontend/my-app
+npm install
+npm run build
+```
+
 ## 🔒 Security Notes
 
 - **API Keys**: Never commit your Anthropic API key to version control
@@ -299,6 +312,8 @@ cd ../frontend/my-app && rm -rf node_modules package-lock.json && npm install
 cd frontend/my-app
 npm run build
 ```
+
+**Note:** Ensure react-scripts is properly installed (version 5.0.1+) before building.
 
 2. Deploy the `build` folder to your hosting platform
 
