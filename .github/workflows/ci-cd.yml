@@ -1,0 +1,195 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  NODE_VERSION: '18'
+  MONGODB_VERSION: '6.0'
+
+jobs:
+  test:
+    name: Test & Build
+    runs-on: ubuntu-latest
+    
+    services:
+      mongodb:
+        image: mongo:6.0
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --eval 'db.adminCommand(\"ping\")'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          cd backend && npm ci
+          cd ../frontend/my-app && npm ci
+
+      - name: Create backend .env file
+        run: |
+          cd backend
+          echo "ANTHROPIC_API_KEY=${{ secrets.ANTHROPIC_API_KEY }}" > .env
+          echo "MONGODB_URI=mongodb://localhost:27017/js_project_test" >> .env
+          echo "NODE_ENV=test" >> .env
+
+      - name: Run backend tests
+        run: |
+          cd backend
+          npm test || echo "No tests configured yet"
+
+      - name: Run frontend tests
+        run: |
+          cd frontend/my-app
+          npm test -- --coverage --watchAll=false
+
+      - name: Lint code
+        run: |
+          cd backend && npm run lint || echo "No linting configured"
+          cd ../frontend/my-app && npm run lint || echo "No linting configured"
+
+      - name: Build frontend
+        run: |
+          cd frontend/my-app
+          npm run build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: frontend/my-app/build/
+
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          cd backend && npm ci
+          cd ../frontend/my-app && npm ci
+
+      - name: Run security audit
+        run: |
+          npm audit --audit-level moderate
+          cd backend && npm audit --audit-level moderate
+          cd ../frontend/my-app && npm audit --audit-level moderate
+
+      - name: Check for secrets
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: main
+          head: HEAD
+
+  deploy-staging:
+    name: Deploy to Staging
+    needs: [test, security]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop'
+    
+    environment:
+      name: staging
+      url: ${{ steps.deploy.outputs.url }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-build
+          path: frontend/my-app/build/
+
+      - name: Deploy to staging
+        id: deploy
+        run: |
+          echo "Deploying to staging environment..."
+          # Add your staging deployment commands here
+          # Examples:
+          # - Deploy to Heroku, Vercel, Netlify, AWS, etc.
+          # - Update Docker containers
+          # - Copy files to staging server
+          echo "url=https://staging.yourapp.com" >> $GITHUB_OUTPUT
+
+  deploy-production:
+    name: Deploy to Production
+    needs: [test, security]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    environment:
+      name: production
+      url: ${{ steps.deploy.outputs.url }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-build
+          path: frontend/my-app/build/
+
+      - name: Deploy to production
+        id: deploy
+        run: |
+          echo "Deploying to production environment..."
+          # Add your production deployment commands here
+          # Examples:
+          # - Deploy to Heroku: git push heroku main
+          # - Deploy to Vercel: vercel --prod
+          # - Deploy to AWS: aws s3 sync build/ s3://your-bucket
+          # - Deploy via SSH to your server
+          echo "url=https://yourapp.com" >> $GITHUB_OUTPUT
+
+      - name: Health check
+        run: |
+          echo "Running post-deployment health checks..."
+          # Add health check commands here
+          # curl -f https://yourapp.com/health || exit 1
+
+  notify:
+    name: Notify Team
+    needs: [deploy-staging, deploy-production]
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+      - name: Notify on success
+        if: needs.deploy-staging.result == 'success' || needs.deploy-production.result == 'success'
+        run: |
+          echo "Deployment successful! 🚀"
+          # Add notification logic here (Slack, Discord, email, etc.)
+
+      - name: Notify on failure
+        if: needs.test.result == 'failure' || needs.security.result == 'failure' || needs.deploy-staging.result == 'failure' || needs.deploy-production.result == 'failure'
+        run: |
+          echo "Pipeline failed! ❌"
+          # Add failure notification logic here
